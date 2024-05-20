@@ -8,6 +8,7 @@
 <title>Time</title>
 </head>
 <body>
+<jsp:include page="menu.jsp"/>
 <h1>Time:</h1>
 
 	<form action="time" method="post">
@@ -28,6 +29,19 @@
 	<c:if test="${not empty erro }">
 	<p>${erro }</p>
 	</c:if>
+	
+	
+	  <c:if test="${not empty time }">
+	 	<p>${time }</p>
+	 </c:if>
+
+ 	<c:if test="${not empty times }">
+ 	
+ 	<c:forEach var="time" items="${times }">
+			 <p>${time }</p><br>
+		 	</c:forEach>
+	 	
+	 </c:if>
 
 </body>
 </html>

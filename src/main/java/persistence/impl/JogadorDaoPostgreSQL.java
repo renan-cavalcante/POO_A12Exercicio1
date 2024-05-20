@@ -1,6 +1,7 @@
 package persistence.impl;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -27,7 +28,7 @@ public class JogadorDaoPostgreSQL implements JogadorDao{
 			Connection conn = db.getConnection();
 			PreparedStatement  ps = conn.prepareStatement("INSERT INTO  jogador(nome,data_nasc,altura,peso,TimeCodigo)  VALUES(?,?,?,?,?)");
 			ps.setString(1, j.getNome() );
-			ps.setString(2, j.getDataNasc().toString());
+			ps.setDate(2, Date.valueOf(j.getDataNasc()));
 			ps.setFloat(3, j.getAltura());
 			ps.setFloat(4, j.getPeso());
 			ps.setInt(5, j.getTime().getCodigo());
@@ -47,7 +48,7 @@ public class JogadorDaoPostgreSQL implements JogadorDao{
 			Connection conn = db.getConnection();
 			PreparedStatement  ps = conn.prepareStatement("UPDATE  jogador SET nome = ?,data_nasc = ? ,altura = ? ,peso = ? ,TimeCodigo = ?  WHERE id = ?");
 			ps.setString(1, j.getNome() );
-			ps.setString(2, j.getDataNasc().toString());
+			ps.setDate(2, Date.valueOf(j.getDataNasc()));
 			ps.setFloat(3, j.getAltura());
 			ps.setFloat(4, j.getPeso());
 			ps.setInt(5, j.getTime().getCodigo());
@@ -66,7 +67,7 @@ public class JogadorDaoPostgreSQL implements JogadorDao{
 	public void delete(Integer c) throws SQLException, ClassNotFoundException {
 		try {
 			Connection conn = db.getConnection();
-			PreparedStatement  ps = conn.prepareStatement("DELETE jogador  WHERE id = ?");
+			PreparedStatement  ps = conn.prepareStatement("DELETE FROM jogador  WHERE id = ?");
 			ps.setInt(1, c);
 			ps.execute();
 			ps.close();
@@ -80,11 +81,11 @@ public class JogadorDaoPostgreSQL implements JogadorDao{
 
 	@Override
 	public Jogador findByCodigo(Integer codigo) throws SQLException, ClassNotFoundException {
-		Jogador j = new Jogador();
+		Jogador j = null;
 		try {
 			Connection conn = db.getConnection();
-			PreparedStatement  ps = conn.prepareStatement("SELECT * FROM jogador join time on TimeCodigo = codigo where id = ?");
-			ps.setInt(1, j.getId());
+			PreparedStatement  ps = conn.prepareStatement("SELECT *, jogador.nome as jogadorNome, time.nome as timeNome FROM jogador join time on TimeCodigo = codigo where id = ?");
+			ps.setInt(1, codigo);
 			ResultSet rs  = ps.executeQuery();
 			if(rs.next()) {
 				Time t = instanciarTime(rs);
@@ -92,7 +93,7 @@ public class JogadorDaoPostgreSQL implements JogadorDao{
 			}
 			ps.close();
 			conn.close();
-			
+			if(j == null) throw new SQLException("Jogador não encotrado");
 		} catch (SQLException e) {
 			throw new SQLException(e.getMessage());
 		}
@@ -104,7 +105,7 @@ public class JogadorDaoPostgreSQL implements JogadorDao{
 		List<Jogador> jogadores = new ArrayList<Jogador>();
 		try {
 			Connection conn = db.getConnection();
-			PreparedStatement  ps = conn.prepareStatement("SELECT * FROM jogador join time on TimeCodigo = .codigo");
+			PreparedStatement  ps = conn.prepareStatement("SELECT *, time.nome as timeNome, jogador.nome as jogadorNome FROM jogador join time on TimeCodigo = codigo");
 			ResultSet rs  = ps.executeQuery();
 			while(rs.next()) {
 				Time t = instanciarTime(rs);
@@ -112,7 +113,7 @@ public class JogadorDaoPostgreSQL implements JogadorDao{
 			}
 			ps.close();
 			conn.close();
-			
+			if(jogadores.size() == 0) throw new SQLException("Nenhum jogador cadastrado");
 		} catch (SQLException e) {
 			throw new SQLException(e.getMessage());
 		}
@@ -122,15 +123,15 @@ public class JogadorDaoPostgreSQL implements JogadorDao{
 	private Time instanciarTime(ResultSet rs) throws SQLException {
 		Time t = new Time();
 		t.setCodigo(rs.getInt("codigo"));
-		t.setNome(rs.getString("time.nome"));
+		t.setNome(rs.getString("timeNome"));
 		t.setCidade(rs.getString("cidade"));
 		return t;
 	}
 
 	private Jogador instanciarJogador(ResultSet rs, Time t) throws SQLException {
 		Jogador j = new Jogador();
-		j.setId(rs.getInt("ido"));
-		j.setNome(rs.getString("jogador.nome"));
+		j.setId(rs.getInt("id"));
+		j.setNome(rs.getString("jogadorNome"));
 		j.setDataNasc(LocalDate.parse(rs.getString("data_nasc")));
 		j.setAltura(rs.getFloat("altura"));
 		j.setPeso(rs.getFloat("peso"));

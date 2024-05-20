@@ -1,6 +1,5 @@
 package controller;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 
 import db.Connection;
@@ -38,27 +37,7 @@ public class TimeServlet extends HttpServlet {
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-response.setContentType("text/plain");
         
-        // Obtém o objeto BufferedReader para ler o corpo da requisição
-        BufferedReader reader = request.getReader();
-        StringBuilder requestBody = new StringBuilder();
-        String line;
-        
-        // Lê o conteúdo do corpo da requisição linha por linha
-        while ((line = reader.readLine()) != null) {
-            requestBody.append(line);
-        }
-        
-        // Fecha o BufferedReader
-        reader.close();
-        
-        // Imprime o conteúdo do corpo da requisição no console
-        System.out.println("Conteúdo do corpo da requisição:");
-        System.out.println(requestBody.toString());
-		
-		
-		
 		try {
 			String cmd = request.getParameter("button");
 
@@ -86,38 +65,45 @@ response.setContentType("text/plain");
 	private void find(HttpServletRequest request) throws Exception {
 		TimeDao tDao = DaoFactory.timeDao();
 		Integer codigo = Integer.parseInt(request.getParameter("codigo"));
-		request.setAttribute("pessoa",tDao.findByCodigo(codigo));
-
+		request.setAttribute("time",tDao.findByCodigo(codigo));
 	}
 
 	private void list(HttpServletRequest request) throws Exception {
 		TimeDao tDao = DaoFactory.timeDao();
-		request.setAttribute("pessoas",tDao.findAll());
+		request.setAttribute("times",tDao.findAll());
 	}
 
 	private void insert(HttpServletRequest request) throws Exception {
 		TimeDao tDao = DaoFactory.timeDao();
 		Time t = instanciaTime(request);
 		tDao.insert(t);
-
 	}
 
 	private void update(HttpServletRequest request) throws Exception {
 		TimeDao tDao = DaoFactory.timeDao();
-		Time t = instanciaTime(request);
-		tDao.update(t);
-
+		
+		if(request.getParameter("codigo").equals("")) throw new IllegalArgumentException("Preencha o codigo");
+		Integer codigo =  Integer.parseInt(request.getParameter("codigo"));
+		Time time = tDao.findByCodigo(codigo);
+		
+		if(request.getParameter("nome") != null && !request.getParameter("nome").equals("") )time.setNome( request.getParameter("nome"));
+		if(request.getParameter("cidade") != null && !request.getParameter("cidade").equals("") )time.setCidade( request.getParameter("cidade"));
+			
+		tDao.update(time);
 	}
 
 	private void delete(HttpServletRequest request) throws Exception {
 		TimeDao tDao = DaoFactory.timeDao();
+		if(request.getParameter("codigo").equals("")) throw new IllegalArgumentException("Preencha o codigo");
 		Integer codigo = Integer.parseInt(request.getParameter("codigo"));
 		tDao.delete(codigo);
-
 	}
 	
 	private Time instanciaTime(HttpServletRequest request) throws Exception {
 		Time time = new Time();
+		
+		if(request.getParameter("nome").equals("")) throw new IllegalArgumentException("Preencha o nome");
+		if(request.getParameter("cidade").equals("")) throw new IllegalArgumentException("Preencha a cidade");
 
 		Integer codigo = request.getParameter("codigo").equals("") ? 0:  Integer.parseInt(request.getParameter("codigo"));
 		String nome = request.getParameter("nome");
@@ -129,5 +115,4 @@ response.setContentType("text/plain");
 
 		return time;
 	}
-
 }

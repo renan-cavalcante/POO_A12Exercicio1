@@ -47,6 +47,24 @@ public class Jogador {
 	public final void setTime(Time time) {
 		this.time = time;
 	}
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("Jogador [id=");
+		builder.append(id);
+		builder.append(", nome=");
+		builder.append(nome);
+		builder.append(", dataNasc=");
+		builder.append(dataNasc);
+		builder.append(", altura=");
+		builder.append(altura);
+		builder.append(", peso=");
+		builder.append(peso);
+		builder.append(", time=");
+		builder.append(time);
+		builder.append("]");
+		return builder.toString();
+	}
 	
 	
 	

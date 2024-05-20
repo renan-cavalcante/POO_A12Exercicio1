@@ -24,6 +24,18 @@ public class Time {
 	public final void setCidade(String cidade) {
 		this.cidade = cidade;
 	}
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("Time [codigo=");
+		builder.append(codigo);
+		builder.append(", nome=");
+		builder.append(nome);
+		builder.append(", cidade=");
+		builder.append(cidade);
+		builder.append("]");
+		return builder.toString();
+	}
      
      
 }

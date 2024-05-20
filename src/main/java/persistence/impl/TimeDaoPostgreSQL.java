@@ -57,7 +57,7 @@ private ConnectionPostgreSQL db;
 	@Override
 	public void delete(Integer codigo) throws Exception {
 		Connection conn = db.getConnection();
-		PreparedStatement  ps = conn.prepareStatement("DELETE time  WHERE codigo = ?");
+		PreparedStatement  ps = conn.prepareStatement("DELETE FROM time  WHERE codigo = ?");
 		ps.setInt(1, codigo);
 		ps.execute();
 		ps.close();
@@ -67,19 +67,20 @@ private ConnectionPostgreSQL db;
 
 	@Override
 	public Time findByCodigo(Integer codigo) throws Exception {
-		Time t = new Time();
+		Time t = null;
 		try {
 			Connection conn = db.getConnection();
 			PreparedStatement  ps = conn.prepareStatement("SELECT * FROM time  where codigo = ?");
-			ps.setInt(1, t.getCodigo());
+			ps.setInt(1, codigo);
 			ResultSet rs  = ps.executeQuery();
 			if(rs.next()) {
 				t = instanciarTime(rs);
 			}
 			ps.close();
 			conn.close();
-			
+			if(t == null) throw new SQLException("Time não encomntrado");
 		} catch (SQLException e) {
+			e.printStackTrace();
 			throw new SQLException(e.getMessage());
 		}
 		return t;
@@ -98,7 +99,7 @@ private ConnectionPostgreSQL db;
 			}
 			ps.close();
 			conn.close();
-			
+			if(t.size() == 0)throw new SQLException("Nenhum time cadastrado");
 		} catch (SQLException e) {
 			throw new SQLException(e.getMessage());
 		}
